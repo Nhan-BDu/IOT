@@ -1,26 +1,27 @@
-//Include thư viện
-#include <OneWire.h>
-#include <DallasTemperature.h>
+// Định nghĩa chân kết nối của cảm biến LM35
+int sensorPin = A0;  // Chân analog để đọc dữ liệu từ cảm biến
+float temperature;   // Biến lưu nhiệt độ
 
-// Chân nối với Arduino
-#define ONE_WIRE_BUS 2
-//Thiết đặt thư viện onewire
-OneWire oneWire(ONE_WIRE_BUS);
-//Mình dùng thư viện DallasTemperature để đọc cho nhanh
-DallasTemperature sensors(&oneWire);
-
-void setup(void)
-{
+void setup() {
+  // Khởi động Serial Monitor
   Serial.begin(9600);
-  sensors.begin();
 }
 
-void loop(void)
-{ 
-  sensors.requestTemperatures();  
-  Serial.print("Nhiet do");
-  Serial.println(sensors.getTempCByIndex(0)); // vì 1 ic nên dùng 0
- 
-  //chờ 1 s rồi đọc để bạn kiệp thấy sự thay đổi
-  delay(1000);
+void loop() {
+  // Đọc giá trị từ chân analog
+  int sensorValue = analogRead(sensorPin);
+
+  // Tính toán nhiệt độ từ giá trị cảm biến
+  temperature = (sensorValue * 5.0 * 100) / 1023;
+
+  // Kiểm tra nếu nhiệt độ nằm trong khoảng từ 35 đến 40 độ C
+  if (temperature >= 35 && temperature <= 40) {
+    // Hiển thị kết quả nhiệt độ trên Serial Monitor
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.println(" C");
+  }
+
+  // Dừng một chút trước khi đo lại
+  delay(100);
 }

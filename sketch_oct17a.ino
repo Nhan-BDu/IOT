@@ -29,7 +29,7 @@ void setup() {
   // Set the callback for beat detection
   pox.setOnBeatDetectedCallback(onBeatDetected);
   Serial.println("Pulse oximeter initialized successfully!");
-    // pox.setOnBeatDetectedCallback(onBeatDetected);
+  //pox.setOnBeatDetectedCallback(onBeatDetected);
 }
 
 void heart_rate() {
@@ -65,7 +65,6 @@ void kiemTraTuThe(double roll, double pitch) {
     } else if (pitch > 60 && pitch < 120) {
         Serial.println("Người dùng đang nằm.");
     }
-    delay(1000);
 }
 
 // Hàm đo gia tốc
@@ -106,7 +105,21 @@ void alocimetter() {
 }
 
 void loop() {
-    heart_rate();
-    // alocimetter();
-    delay(500);
+    // int check = 1;
+    // if (check == 1){
+    //   heart_rate();
+    //   check = 2;
+    // }
+    // else if (check == 2){
+    //   alocimetter();
+    //   check = 1;
+    // }
+    
+    // Serial.println("kkkk");
+    
+    kiemTraTuThe(double roll, double pitch);
+
+  
+    // delay(100);
 }
+

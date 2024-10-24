@@ -1,8 +1,11 @@
 #include <Wire.h>
 #include "MAX30100_PulseOximeter.h"
+#include <Adafruit_MLX90614.h>
 #include <math.h>
 #define REPORTING_PERIOD_MS 1000
 
+
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 PulseOximeter pox;
 uint32_t tsLastReport = 0;
 int sensorPin = A0;  // Chân analog để đọc dữ liệu từ cảm biến
@@ -21,11 +24,7 @@ void onBeatDetected() {
 void setup() {
   Serial.begin(9600);
   pox.begin();
-  if (!pox.begin()) {
-    Serial.println("Failed to initialize pulse oximeter! Please check your connections.");
-    while (1); // Halt the program
-  }
-
+  mlx.begin();  
   // Set the callback for beat detection
   pox.setOnBeatDetectedCallback(onBeatDetected);
   Serial.println("Pulse oximeter initialized successfully!");
@@ -53,18 +52,25 @@ void heart_rate() {
 // Hàm kiểm tra tư thế
 void kiemTraTuThe(double roll, double pitch) {
     if (roll > 150 && roll < 210) {
-        Serial.println("Người dùng đang nằm sấp.");
+        Serial.println("nằm.");
+        delay(10);
     } else if (roll > 330 || roll < 30) {
-        Serial.println("Người dùng đang nằm ngửa.");
+        Serial.println("nằm.");
+        delay(10);
     } else if (roll > 60 && roll < 120) {
-        Serial.println("Người dùng đang nằm nghiêng.");
+        Serial.println("nằm.");
+        delay(10);
+    } else if (pitch > 60 && pitch < 120) {
+        Serial.println("nằm.");
+        delay(10);
     }
 
     if (pitch > 150 && pitch < 210) {
-        Serial.println("Người dùng đang đứng hoặc ngồi thẳng.");
-    } else if (pitch > 60 && pitch < 120) {
-        Serial.println("Người dùng đang nằm.");
-    }
+        heart_rate();
+        Serial.println("đứng.");
+        delay(10);
+    } 
+    
 }
 
 // Hàm đo gia tốc
@@ -77,15 +83,15 @@ void alocimetter() {
     y_adc_value = analogRead(y_out);
     z_adc_value = analogRead(z_out);
 
-    Serial.print("X = ");
-    Serial.print(x_adc_value);
-    Serial.print("\t\t");
-    Serial.print("Y = ");
-    Serial.print(y_adc_value);
-    Serial.print("\t\t");
-    Serial.print("Z = ");
-    Serial.print(z_adc_value);
-    Serial.print("\t\t");
+    // Serial.print("X = ");
+    // Serial.print(x_adc_value);
+    // Serial.print("\t\t");
+    // Serial.print("Y = ");
+    // Serial.print(y_adc_value);
+    // Serial.print("\t\t");
+    // Serial.print("Z = ");
+    // Serial.print(z_adc_value);
+    // Serial.print("\t\t");
 
     x_g_value = ( ((double)(x_adc_value * 5) / 1024) - 1.65 ) / 0.330;
     y_g_value = ( ((double)(y_adc_value * 5) / 1024) - 1.65 ) / 0.330;
@@ -94,12 +100,12 @@ void alocimetter() {
     roll = (atan2(y_g_value, z_g_value) * 180) / 3.14 + 180;
     pitch = (atan2(z_g_value, x_g_value) * 180) / 3.14 + 180;
 
-    Serial.print("Roll = ");
-    Serial.print(roll);
-    Serial.print("\t");
-    Serial.print("Pitch = ");
-    Serial.print(pitch);
-    Serial.print("\n\n");
+    // Serial.print("Roll = ");
+    // Serial.print(roll);
+    // Serial.print("\t");
+    // Serial.print("Pitch = ");
+    // Serial.print(pitch);
+    // Serial.print("\n\n");
 
     kiemTraTuThe(roll, pitch);
 }
@@ -116,10 +122,10 @@ void loop() {
     // }
     
     // Serial.println("kkkk");
-    
-    kiemTraTuThe(double roll, double pitch);
-
+    // delay(1000);
+    alocimetter();
+    Serial.println(mlx.readObjectTempC());
+    // delay(1000);
   
-    // delay(100);
 }
 

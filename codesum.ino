@@ -9,7 +9,10 @@ Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 PulseOximeter pox;
 uint32_t tsLastReport = 0;
 int sensorPin = A0;  // Chân analog để đọc dữ liệu từ cảm biến
-float temperature;   // Biến lưu nhiệt độ
+int status = 0;
+float o2 = 0;
+float hr = 0;
+float temp = 0;
 
 // #define WIFI_SSID "#" 
 // #define WIFI_PASSWORD "#"
@@ -18,59 +21,59 @@ const int y_out = A2;
 const int z_out = A3;
 
 void onBeatDetected() {
-    Serial.println("Beat!");
+    Serial.print("");
 }
 
 void setup() {
   Serial.begin(9600);
   pox.begin();
   mlx.begin();  
+  if (!pox.begin()) {
+    // Serial.println("Failed to initialize pulse oximeter! Please check your connections.");
+    while (1); // Halt the program
+  }
   // Set the callback for beat detection
   pox.setOnBeatDetectedCallback(onBeatDetected);
   Serial.println("Pulse oximeter initialized successfully!");
   //pox.setOnBeatDetectedCallback(onBeatDetected);
+  float heartRate = pox.getHeartRate();
+  float spO2 = pox.getSpO2();
 }
 
 void heart_rate() {
-    pox.update();
-    if (millis() - tsLastReport > 1000) {
-      tsLastReport = millis();
-      float heartRate = pox.getHeartRate();
-      float spO2 = pox.getSpO2();
-      if (heartRate > 0) {  
-          Serial.print("Heart rate: ");
-          Serial.print(heartRate);
-          Serial.print(" bpm / SpO2: ");
-          Serial.print(spO2);
-          Serial.println("%");
-      } else {
-        Serial.println("Heart rate data not available.");
-    }
+  pox.update();
+  if (millis() - tsLastReport > 1000) {
+    tsLastReport = millis();
+    float heartRate = pox.getHeartRate();
+    float spO2 = pox.getSpO2();
+    if (heartRate > 0) {  
+      hr = heartRate;
+      o2 = spO2;
+    } 
   }
 }
 
 // Hàm kiểm tra tư thế
 void kiemTraTuThe(double roll, double pitch) {
     if (roll > 150 && roll < 210) {
-        Serial.println("nằm.");
+        status = 1;
         delay(10);
-    } else if (roll > 330 || roll < 30) {
-        Serial.println("nằm.");
+    }  else if (roll > 330 || roll < 30) {
+        status = 1;
         delay(10);
     } else if (roll > 60 && roll < 120) {
-        Serial.println("nằm.");
+        status = 1;
         delay(10);
     } else if (pitch > 60 && pitch < 120) {
-        Serial.println("nằm.");
+        status = 1;
         delay(10);
     }
-
     if (pitch > 150 && pitch < 210) {
-        Serial.println("đứng.");
+        status = 0;
         delay(10);
     } 
-    
-}
+}  
+
 
 // Hàm đo gia tốc
 void alocimetter() {
@@ -124,8 +127,21 @@ void loop() {
     // delay(1000);
     alocimetter();
     heart_rate();
-    Serial.println(mlx.readObjectTempC());
-    // delay(1000);
-  
+    temp = mlx.readObjectTempC();
+    Serial.println(temp);
+    if (o2 != 0 && hr != 0 && temp != 0 && status != 0){
+      Serial.print(o2);
+      Serial.print(" ");
+      Serial.print(hr);
+      Serial.print(" ");
+      Serial.print(temp);
+      Serial.print(" ");
+      Serial.print(status);
+      Serial.println();
+      o2 = 0 ;
+      hr = 0;
+      temp = 0;
+      status = 0;
+    }
 }
 
